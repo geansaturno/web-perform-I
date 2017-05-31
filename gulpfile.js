@@ -1,15 +1,15 @@
 /*
 
     Gulpfile de exemplo para algumas ações clássicas de otimização.
-    
+
     Para aprender mais sobre Gulp, veja o Curso Online de Gulp do Alura:
 
         https://www.alura.com.br/curso-online-gulp
 
  */
 
-
 var gulp = require('gulp');
+var browserSync = require('browser-sync');
 var $ = require('gulp-load-plugins')({rename: {'gulp-rev-delete-original':'revdel', 'gulp-if': 'if'}});
 
 
@@ -31,19 +31,19 @@ gulp.task('clean', function() {
 gulp.task('minify-js', function() {
   return gulp.src('site/**/*.js')
     .pipe($.uglify())
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('minify-css', function() {
   return gulp.src('site/**/*.css')
     .pipe($.cssnano({safe: true}))
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest('dist/'));
 });
 
 gulp.task('minify-html', function() {
   return gulp.src('site/**/*.html')
     .pipe($.htmlmin({collapseWhitespace: true}))
-    .pipe(gulp.dest('dist/'))
+    .pipe(gulp.dest('dist/'));
 });
 
 
@@ -83,8 +83,8 @@ gulp.task('rev', function(){
     .pipe($.revdel())
     .pipe(gulp.dest('dist/'))
     .pipe($.rev.manifest())
-    .pipe(gulp.dest('dist/'))
-})
+    .pipe(gulp.dest('dist/'));
+});
 
 gulp.task('revreplace', ['rev'], function(){
   return gulp.src(['dist/index.html', 'dist/app.yaml', 'dist/**/*.css'])
@@ -95,11 +95,25 @@ gulp.task('revreplace', ['rev'], function(){
     .pipe(gulp.dest('dist/'));
 });
 
+// Server
+gulp.task('server', function(){
+
+    var express = require('express');
+    express()
+    .use(express.static('./site'))
+    .listen('3000', function(){
+        console.log('Servidor estático em http://localhost:3000');
+    });
+
+    express()
+    .use(express.static('./dist'))
+    .listen('4000', function(){
+        console.log('Servidor estático em http://localhost:4000');
+    });
+});
 
 
 /* Alias */
 gulp.task('minify', ['minify-js', 'minify-css', 'minify-html']);
 gulp.task('build', $.sequence(['minify-js', 'minify-css', 'imagemin'], 'useref', 'revreplace'));
 gulp.task('default', $.sequence('clean', 'copy', 'build'));
-
-
